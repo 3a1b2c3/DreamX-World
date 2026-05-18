@@ -136,6 +136,10 @@ def parse_args():
                         choices=["float16", "bfloat16", "float32"],
                         help="Weight data type")
 
+    # Resume / overwrite
+    parser.add_argument("--overwrite", action="store_true",
+                        help="Re-generate samples even if the target mp4 already exists. Default behaviour skips them.")
+
     args = parser.parse_args()
     
     return args
@@ -346,7 +350,13 @@ def process_inference_from_json(args, pipeline, device, vae, boundary):
         video_name = name + '_' + action_name + '.mp4'
         video_path = os.path.join(args.output_dir, video_name)
 
-   
+        # Skip-if-exists: a previously-completed sample's mp4 is already in
+        # output_dir, so don't redo the 30-50 step denoise + VAE decode for it.
+        # Set --overwrite to force regeneration.
+        if not getattr(args, "overwrite", False) and os.path.exists(video_path):
+            print_info(f"\n⏭  [{idx+1}/{len(items)}] {file_name}: output already exists, skipping ({video_path})")
+            continue
+
         print_info(f"\n🎬 Processing image [{idx+1}/{len(items)}]: {file_name}")
         print_info(f"📝 Prompt: {prompt}")
         
