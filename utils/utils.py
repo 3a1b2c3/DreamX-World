@@ -74,7 +74,11 @@ def save_videos_grid(videos: torch.Tensor, path: str, rescale=False, n_rows=6, f
     os.makedirs(os.path.dirname(path), exist_ok=True)
     if imageio_backend:
         if path.endswith("mp4"):
-            imageio.mimsave(path, outputs, fps=fps)
+            # imageio.mimsave silently drops fps for some ffmpeg builds; force
+            # via output_params so the encoded mp4 actually reports `fps` (the
+            # MIND scorer aligns by timestamp, so a wrong fps tag will shift
+            # every action metric).
+            imageio.mimsave(path, outputs, fps=fps, output_params=['-r', str(fps)])
         else:
             imageio.mimsave(path, outputs, duration=(1000 * 1/fps))
     else:
