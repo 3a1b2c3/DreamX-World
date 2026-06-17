@@ -203,7 +203,7 @@ def setup_models(args):
             from safetensors.torch import load_file
             state_dict = load_file(args.vae_path)
         else:
-            state_dict = torch.load(args.vae_path, map_location="cpu")
+            state_dict = torch.load(args.vae_path, map_location="cpu", weights_only=False)
         state_dict = state_dict["state_dict"] if "state_dict" in state_dict else state_dict
         m, u = vae.load_state_dict(state_dict, strict=False)
         print_info(f"missing keys: {len(m)}, unexpected keys: {len(u)}")

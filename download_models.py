@@ -5,9 +5,10 @@ being copied into the project folder, so they're deduplicated and reusable acros
 projects. The resolved snapshot paths are printed at the end.
 
 Usage:
-    python download_models.py                 # both -> HF cache
-    python download_models.py --only wan      # only Wan base
-    python download_models.py --only dreamx   # only DreamX model
+    python download_models.py                  # Wan base + DreamX-World-5B (AR) -> HF cache
+    python download_models.py --only wan       # only Wan base
+    python download_models.py --only dreamx_ar # only the autoregressive 5B (default DreamX model)
+    python download_models.py --only dreamx    # only the older Cam model
     python download_models.py --cache_dir D:/hf  # override HF cache location
 """
 
@@ -19,7 +20,8 @@ from huggingface_hub import snapshot_download
 
 
 WAN_REPO = "Wan-AI/Wan2.2-TI2V-5B"
-DREAMX_REPO = "GD-ML/DreamX-World-5B-Cam"
+DREAMX_REPO = "GD-ML/DreamX-World-5B-Cam"        # bidirectional, camera-controlled, ~5s
+DREAMX_AR_REPO = "GD-ML/DreamX-World-5B"         # autoregressive, long-horizon up to 1-min
 
 
 def download(repo_id: str, cache_dir: str | None) -> str:
@@ -32,13 +34,16 @@ def download(repo_id: str, cache_dir: str | None) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--cache_dir", default=None, help="Override HF cache dir (default ~/.cache/huggingface/hub)")
-    parser.add_argument("--only", choices=["wan", "dreamx"], default=None)
+    parser.add_argument("--only", choices=["wan", "dreamx", "dreamx_ar"], default=None,
+                        help="wan=base, dreamx=Cam model, dreamx_ar=autoregressive 5B")
     args = parser.parse_args()
 
     repos = []
     if args.only in (None, "wan"):
         repos.append(WAN_REPO)
-    if args.only in (None, "dreamx"):
+    if args.only in (None, "dreamx_ar"):    # AR (long-horizon) 5B is the default DreamX model
+        repos.append(DREAMX_AR_REPO)
+    if args.only == "dreamx":               # Cam model only on explicit request
         repos.append(DREAMX_REPO)
 
     paths = {repo: download(repo, args.cache_dir) for repo in repos}

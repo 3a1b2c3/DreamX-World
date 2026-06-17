@@ -24,6 +24,7 @@ Usage:
 import argparse
 import json
 import os
+import time
 
 import cv2
 import numpy as np
@@ -32,7 +33,7 @@ from einops import rearrange
 from omegaconf import OmegaConf
 from PIL import Image
 from torchvision import transforms
-from torchvision.io import write_video
+import imageio.v2 as imageio
 import torch.nn.functional as F
 
 from pipeline.pipeline_causal_camera import CausalCameraInferencePipeline
@@ -196,7 +197,7 @@ def load_pipeline(args, config, device):
     )
 
     if args.base_checkpoint_path:
-        state_dict = torch.load(args.base_checkpoint_path, map_location="cpu")
+        state_dict = torch.load(args.base_checkpoint_path, map_location="cpu", weights_only=False)
         checkpoint_key = "generator_ema" if "generator_ema" in state_dict else "generator"
         gen_sd = state_dict.get(checkpoint_key, state_dict)
         try:
@@ -212,7 +213,7 @@ def load_pipeline(args, config, device):
             sd = load_file(args.checkpoint_path)
             sd = {"model." + k: v for k, v in sd.items()}
         elif args.checkpoint_path.endswith(".pt"):
-            raw = torch.load(args.checkpoint_path, map_location="cpu")
+            raw = torch.load(args.checkpoint_path, map_location="cpu", weights_only=False)
             sd = raw.get("generator_ema", raw.get("generator", raw))
         else:
             import glob
@@ -237,7 +238,7 @@ def load_pipeline(args, config, device):
             lora_config=config.adapter,
         )
         print(f"Loading LoRA checkpoint from {lora_ckpt_path}")
-        lora_checkpoint = torch.load(lora_ckpt_path, map_location="cpu")
+        lora_checkpoint = torch.load(lora_ckpt_path, map_location="cpu", weights_only=False)
         if isinstance(lora_checkpoint, dict) and "generator_lora" in lora_checkpoint:
             peft.set_peft_model_state_dict(pipeline.generator.model, lora_checkpoint["generator_lora"])
         else:
@@ -325,7 +326,9 @@ def main():
         cam_objects = [Camera(cam_params_np[i].tolist()) for i in range(cam_params_np.shape[0])]
         control_camera = cam_params_to_prope_dict(cam_objects, device=device, chunk_relative=args.chunk_relative)
 
-        # 4) Run inference
+        # 4) Run inference (timed to measure generation speed)
+        torch.cuda.synchronize()
+        _t0 = time.perf_counter()
         video, latents = pipeline.inference(
             noise=sampled_noise,
             text_prompts=[caption],
@@ -333,6 +336,10 @@ def main():
             y_camera=control_camera,
             return_latents=True,
         )
+        torch.cuda.synchronize()
+        _elapsed = time.perf_counter() - _t0
+        print(f"[{idx}] Generation speed: {num_pixel_frames} px frames in {_elapsed:.1f}s "
+              f"= {num_pixel_frames / _elapsed:.2f} fps ({_elapsed / num_pixel_frames * 1000:.0f} ms/frame)")
 
         # 5) Post-process and save video
         video = rearrange(video, 'b t c h w -> b t h w c').cpu()
@@ -346,7 +353,16 @@ def main():
             color_correction_strength=args.color_correction_strength,
         )
 
-        write_video(output_path, video[0], fps=args.fps)
+        # imageio replaces torchvision.io.write_video (removed in recent torchvision).
+        frames = video[0]
+        if hasattr(frames, "detach"):
+            frames = frames.detach().cpu().numpy()
+        frames = np.clip(np.asarray(frames), 0, 255).astype(np.uint8)
+        writer = imageio.get_writer(output_path, fps=int(args.fps), codec="libx264",
+                                    quality=8, macro_block_size=1)
+        for frame in frames:
+            writer.append_data(frame)
+        writer.close()
         print(f"    Saved: {output_path}")
 
     print("Done.")
