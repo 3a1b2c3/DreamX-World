@@ -19,7 +19,20 @@ import sys
 import tempfile
 from pathlib import Path
 
+from huggingface_hub import snapshot_download
+
 HERE = Path(__file__).resolve().parent
+
+WAN_REPO = "Wan-AI/Wan2.2-TI2V-5B"
+DREAMX_REPO = "GD-ML/DreamX-World-5B-Cam"
+
+
+def resolve_model(path: Path | None, repo_id: str) -> Path:
+    """Use the given path if it exists locally, else resolve from the HF cache
+    (downloads if missing)."""
+    if path is not None and Path(path).exists():
+        return Path(path)
+    return Path(snapshot_download(repo_id=repo_id, resume_download=True))
 
 
 def build_cmd(args: argparse.Namespace, input_json: Path) -> list[str]:
@@ -50,8 +63,10 @@ def build_cmd(args: argparse.Namespace, input_json: Path) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--model_name",       type=Path, default=HERE / "Wan2.2-TI2V-5B")
-    parser.add_argument("--transformer_path", type=Path, default=HERE / "DreamX-World-5B-Cam")
+    parser.add_argument("--model_name",       type=Path, default=None,
+                        help="Wan base path; default resolves from the HF cache")
+    parser.add_argument("--transformer_path", type=Path, default=None,
+                        help="DreamX model path; default resolves from the HF cache")
     parser.add_argument("--input_json",       type=Path, default=HERE / "configs" / "dreamx" / "eval.json")
     parser.add_argument("--output_dir",       type=Path, default=HERE / "outputs")
     parser.add_argument("--indices",          type=int, nargs="+", default=None,
@@ -71,11 +86,15 @@ def main() -> int:
                                  "sequential_cpu_offload"])
     args = parser.parse_args()
 
-    for p in (args.model_name, args.transformer_path, args.input_json):
-        if not p.exists():
-            print(f"[run_examples] missing: {p}", file=sys.stderr)
-            print("Run `python download_models.py` first.", file=sys.stderr)
-            return 2
+    # Resolve model paths from the HF cache (downloads if missing).
+    args.model_name = resolve_model(args.model_name, WAN_REPO)
+    args.transformer_path = resolve_model(args.transformer_path, DREAMX_REPO)
+    print(f"[run_examples] model_name       = {args.model_name}")
+    print(f"[run_examples] transformer_path = {args.transformer_path}")
+
+    if not args.input_json.exists():
+        print(f"[run_examples] missing eval json: {args.input_json}", file=sys.stderr)
+        return 2
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
