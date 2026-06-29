@@ -208,6 +208,19 @@ Join our WeChat group for discussion:
   <img src="assets/wechat_group_qrcode4.png" width="300" alt="WeChat Group QR Code">
 </div>
 
+## 📚 Citation
+
+If you find DreamX-World useful in your research, please consider citing our technical report:
+
+```bibtex
+@article{team2026dreamx,
+  title={DreamX-World 1.0: A General-Purpose Interactive World Model},
+  author={Team, DreamX and Bai, Yancheng and Chen, Rui and Chu, Xiangxiang and Dang, Rujing and Dou, Hao and Gao, Bingjie and Gu, Qiwen and Hong, Siyu and Lei, Jiachen and others},
+  journal={arXiv preprint arXiv:2606.16993},
+  year={2026}
+}
+```
+
 ## 📜 License
 
 This project is licensed under Apache 2.0. See [LICENSE](LICENSE.txt) for details.
