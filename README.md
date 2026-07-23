@@ -9,12 +9,14 @@ DreamX Team
 
 <div align="center">
 
-[![Page](https://img.shields.io/badge/%F0%9F%8C%90%20Project%20Page-Demo-00bfff)](https://amap-ml.github.io/DreamX_World)
+[![Official Website](https://img.shields.io/badge/%F0%9F%8C%90%20Official%20Website-Play-8A2BE2?logo=)](https://www.dreamx-world.com)
+[![Reactor](https://img.shields.io/badge/REACTOR-Play-black?logo=data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIACAAIAMBIgACEQEDEQH/xAAXAAEBAQEAAAAAAAAAAAAAAAAHBAYF/8QAJRAAAgICAgAGAwEAAAAAAAAAAQIDBAURACEGBxITMUFRYbEV/8QAFgEBAQEAAAAAAAAAAAAAAAAAAAQD/8QAGBEAAwEBAAAAAAAAAAAAAAAAAQIRADH/2gAMAwEAAhEDEQA/ANyqljocoSvsfHON4ntz47wtlLtR/bsQ1maN9b9J/PMfgqmTyWHqXp/M8VJZ4g7QOybjJ+juQfzkIWi7W5JevofHJ2Uqe+H2dqZPG4e3eg8zxblgiLrAjJuQj6GpD/ObDwxbnyPhbF3bb+5YmrK0j616j+eCsFy7oWPYfH2Et1zZgMTCSFU9ZkXXagfZPCvHeXLWsDn8vdw8la1Ir/5mMRnLQ99E97J+gD+zrsaVVYqdjlCWND54VyvMIuIsj5ctVwOAy9LDyWbUap/p4x2cNN32R3sH6IH6OujtUr+wmPrpUrmtAIlEcLJ6DGuulI+iOUvY2Pnk7MWPfDOW7gE3/9k=)](https://www.reactor.inc/dreamx)
 [![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-yellow)](https://huggingface.co/GD-ML/DreamX-World-5B)
 [![ModelScope](https://img.shields.io/badge/ModelScope-Model-624aff?logo=modelscope)](https://modelscope.cn/models/GD-ML/DreamX-World-5B)
 [![Tech Report](https://img.shields.io/badge/arXiv-2606.16993-b31b1b.svg)](https://arxiv.org/abs/2606.16993)
-[![License](https://img.shields.io/badge/License-Apache--2.0-green)](LICENSE.txt)
 
+[![Page](https://img.shields.io/badge/%F0%9F%8C%90%20Project%20Page-Demo-00bfff)](https://amap-ml.github.io/DreamX_World)
+[![License](https://img.shields.io/badge/License-Apache--2.0-green)](LICENSE.txt)
 </div>
 
 -----
@@ -24,9 +26,10 @@ DreamX Team
 The model is trained with a scalable data engine on Unreal Engine data, gameplay footage, and real-world videos, combined with camera estimation and strict data filtering to learn realistic dynamics and interactions. It follows a progressive training pipeline: learning fine-grained action control first, then open-ended event response, and using Reinforcement Learning to improve action following, interaction consistency, and visual fidelity. Finally, through forcing and distillation, DreamX-World achieves efficient inference, making interactive generation practical at scale.
 
 ## :fire: News
-- 2026.06.15: We released DreamX-World 1.0 technical report.
-- 2026.06.15: We open-sourced [DreamX-World-5B](inference_README.md) that supports 1-min video generation.
-- 2026.05.11: We open-sourced [DreamX-World-5B-Cam](inference_README.md) and inference codes.
+- **Jul 23, 2026:** DreamX-World 1.0 is now live! Head over to the [Official Website](https://www.dreamx-world.com) to experience our interactive world model.
+- **June 15, 2026:** We released DreamX-World 1.0 technical report.
+- **June 15, 2026:** We open-sourced [DreamX-World-5B](inference_README.md) that supports 1-min video generation.
+- **May 11, 2026:** We open-sourced [DreamX-World-5B-Cam](inference_README.md) and inference codes.
 
 ## :calendar: Plan
 - :heavy_check_mark: DreamX-World-5B-Cam Model.
